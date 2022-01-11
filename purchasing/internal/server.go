@@ -4,21 +4,21 @@ import (
 	"context"
 
 	"github.com/AlfredoPastor/ddd-go/purchasing/internal/order/infraestructure/bus"
-	"github.com/AlfredoPastor/ddd-go/shared/ginhttp"
+	"github.com/AlfredoPastor/ddd-go/purchasing/internal/order/infraestructure/httpController"
 )
 
 type Server struct {
-	ginhttp.HttpServer
+	httpController.HttpController
 	bus.Bus
 }
 
 func NewServer(
-	httpserver ginhttp.HttpServer,
+	httpserver httpController.HttpController,
 	bus bus.Bus,
 ) Server {
 	return Server{
-		HttpServer: httpserver,
-		Bus:        bus,
+		HttpController: httpserver,
+		Bus:            bus,
 	}
 }
 
@@ -29,5 +29,5 @@ func (s *Server) Run() error {
 		return err
 	}
 
-	return s.HttpServer.Run(ctx)
+	return s.HttpController.Run(ctx)
 }

@@ -20,7 +20,7 @@ type MongoAtlasEnv struct {
 	MongoAtlasDb          string        `env:"MONGOATLAS_DB"`
 	MongoAtlasConnTimeout time.Duration `env:"MONGOATLAS_CONN_TIMEOUT" envDefault:"10s"`
 	CredentialsFile       string        `env:"MONGOATLAS_CREDENTIALS_FILE"`
-	User                  string        `env:"MONGOATLAS_USER" envDefault:"root"`
+	User                  string        `env:"MONGOATLAS_USER" envDefault:""`
 	Password              string        `env:"MONGOATLAS_PASSWORD" envDefault:""`
 }
 
@@ -51,9 +51,10 @@ func connect(env *MongoAtlasEnv) (client *mongo.Client, err error) {
 	}
 
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	client, err = mongo.Connect(ctx, options.Client().ApplyURI(fmt.Sprintf("mongodb+srv://%s:%s@%s/%s?retryWrites=true&w=majority", env.User, env.Password, env.MongoAtlasURL, env.MongoAtlasDb)))
+	uri := fmt.Sprintf("mongodb://%s/%s?retryWrites=true&w=majority", env.MongoAtlasURL, env.MongoAtlasDb)
+	client, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	if err != nil {
-		return nil, fmt.Errorf("no se pudo crear el cliente de Mongo Atlas: %s", err)
+		return nil, fmt.Errorf("no se pudo crear el cliente de Mongo Atlas con url %s: %s", uri, err.Error())
 	}
 	err = client.Ping(ctx, readpref.Primary())
 	if err != nil {
