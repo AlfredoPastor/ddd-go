@@ -1,0 +1,58 @@
+version: "3.9"  # optional since v1.27.0
+services:
+  go-builder:
+    build: .
+  purchasing:
+    build: ./purchasing/.
+    image: ddd-go_purchasing:latest
+    deploy:
+      replicas: 1
+    restart: always
+    environment:
+      - RABBIT_URL=rabbitmq:5672
+      - MONGOATLAS_URL=mongo
+      - HTTP_ADDR=localhost
+      - HTTP_PORT=5005
+    ports:
+      - "5005:5005"
+    depends_on:
+      - go-builder
+      - rabbitmq
+      - mongo
+  inventory:
+    build: ./inventory/.
+    image: ddd-go_inventory:latest
+    deploy:
+      replicas: 1
+    restart: always
+    environment:
+      - RABBIT_URL=rabbitmq:5672
+      - MONGOATLAS_URL=mongo
+      - HTTP_ADDR=localhost
+      - HTTP_PORT=5006
+    ports:
+      - "5006:5006"
+    depends_on:
+      - go-builder
+      - rabbitmq
+      - mongo
+  rabbitmq:
+    image: rabbitmq:3-management
+    deploy:
+      replicas: 1
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  mongo:
+    image: mongo
+    restart: always
+    volumes:
+      - data:/data/db
+    # environment:
+    #   MONGO_INITDB_ROOT_USERNAME: root
+    #   MONGO_INITDB_ROOT_PASSWORD: example
+volumes:
+  data:
+    # external:
+    #   name: "database"
