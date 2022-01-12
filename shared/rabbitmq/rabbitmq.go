@@ -29,14 +29,13 @@ func (c *Connection) Channel() (*Channel, error) {
 
 	go func() {
 		for {
-			reason, ok := <-channel.Channel.NotifyClose(make(chan *amqp.Error))
+			_, ok := <-channel.Channel.NotifyClose(make(chan *amqp.Error))
 			// exit this goroutine if closed by developer
 			if !ok || channel.IsClosed() {
 				debug("channel closed")
 				channel.Close() // close again, ensure closed flag set when connection closed
 				break
 			}
-			debug("channel closed, reason: %v", reason)
 
 			// reconnect if not closed by developer
 			for {
