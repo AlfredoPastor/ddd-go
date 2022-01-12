@@ -5,14 +5,14 @@ WORKDIR /go/src/github.com/AlfredoPastor/ddd-go/purchasing
 ADD cmd cmd
 ADD internal internal
 
-RUN go build -o /go/bin/purchasing cmd/main.go
+RUN CGO_ENABLED=0 go build -o /go/bin/purchasing cmd/main.go
 
-# # ---------------------------------------------------------------------------- #
-# #                                 create image                                 #
-# # ---------------------------------------------------------------------------- #
+# ---------------------------------------------------------------------------- #
+#                                 create image                                 #
+# ---------------------------------------------------------------------------- #
 
-# FROM scratch
+FROM scratch
 
-# COPY --from=go_builder /go/bin/purchasing /purchasing
+COPY --from=go_builder /go/bin/purchasing /purchasing
 
-CMD ["/go/bin/purchasing"]
+CMD ["/purchasing"]
