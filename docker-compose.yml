@@ -11,7 +11,8 @@ services:
     environment:
       - RABBIT_URL=rabbitmq:5672
       - MONGOATLAS_URL=mongo
-      - HTTP_ADDR=localhost
+      - MONGOATLAS_DB=purchasing
+      # - HTTP_ADDR=localhost
       - HTTP_PORT=5005
     ports:
       - "5005:5005"  

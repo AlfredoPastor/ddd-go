@@ -10,7 +10,7 @@ import (
 )
 
 type OrderAdapter struct {
-	ID              primitive.ObjectID `bson:"id"`
+	ID              primitive.ObjectID `bson:"_id"`
 	ClientID        primitive.ObjectID `bson:"client_id"`
 	AddressShipping string             `bson:"address_shipping"`
 	Taxes           float64            `bson:"taxes"`
@@ -31,7 +31,7 @@ func NewOrderAdapter(order domain.Order) OrderAdapter {
 	if err != nil {
 		log.Println(err.Error())
 	}
-	clientId, err := primitive.ObjectIDFromHex(order.ID.String())
+	clientId, err := primitive.ObjectIDFromHex(order.ClientID.String())
 	if err != nil {
 		log.Println(err.Error())
 	}
