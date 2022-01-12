@@ -30,7 +30,7 @@ func NewOrder(id, clientId, address string, orderLines []OrderLine) (Order, erro
 	if err != nil {
 		return Order{}, err
 	}
-	idClientVo, err := vo.NewIDFromString(id)
+	idClientVo, err := vo.NewIDFromString(clientId)
 	if err != nil {
 		return Order{}, err
 	}

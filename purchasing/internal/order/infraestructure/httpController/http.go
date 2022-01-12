@@ -54,6 +54,6 @@ func (h *HttpController) createOrder() gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusAccepted, nil)
+		ctx.String(http.StatusCreated, "")
 	}
 }
