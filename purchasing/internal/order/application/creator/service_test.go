@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/AlfredoPastor/ddd-go/purchasing/internal/order/application/mocks"
 	"github.com/AlfredoPastor/ddd-go/purchasing/internal/order/domain"
 	"github.com/AlfredoPastor/ddd-go/shared/eventbus"
 	"github.com/AlfredoPastor/ddd-go/shared/eventbus/eventmocks"
@@ -46,7 +47,7 @@ func Test_OrderCreatorService(t *testing.T) {
 	ctx := context.Background()
 	orderTest := NewOrderTest()
 
-	orderRepositoryMock := NewOrderRepositoryMock()
+	orderRepositoryMock := mocks.NewOrderRepositoryMock()
 	orderRepositoryMock.On("Save", mock.Anything, mock.AnythingOfType("domain.Order")).Return(nil).Once()
 
 	eventBusMock := eventmocks.NewMockBus()
@@ -67,7 +68,7 @@ func Test_OrderCreatorService_Save_Error(t *testing.T) {
 	orderTest := NewOrderTest()
 
 	eventBusMock := eventmocks.NewMockBus()
-	orderRepositoryMock := NewOrderRepositoryMock()
+	orderRepositoryMock := mocks.NewOrderRepositoryMock()
 	orderRepositoryMock.On("Save", mock.Anything, mock.AnythingOfType("domain.Order")).Return(errors.New("something unexpected happened")).Once()
 
 	orderCreatorService := NewOrderCreatorService(orderRepositoryMock, eventBusMock)
@@ -83,7 +84,7 @@ func Test_OrderCreatorService_OrderEntityError(t *testing.T) {
 	orderTest.AddressShipping = ""
 
 	eventBusMock := eventmocks.NewMockBus()
-	orderRepositoryMock := NewOrderRepositoryMock()
+	orderRepositoryMock := mocks.NewOrderRepositoryMock()
 
 	orderCreatorService := NewOrderCreatorService(orderRepositoryMock, eventBusMock)
 	err := orderCreatorService.Create(ctx, orderTest.ID, orderTest.ClientID, orderTest.AddressShipping, orderTest.OrderLines)
@@ -96,7 +97,7 @@ func Test_OrderCreatorService_PublishEventError(t *testing.T) {
 	ctx := context.Background()
 	orderTest := NewOrderTest()
 
-	orderRepositoryMock := NewOrderRepositoryMock()
+	orderRepositoryMock := mocks.NewOrderRepositoryMock()
 	orderRepositoryMock.On("Save", mock.Anything, mock.AnythingOfType("domain.Order")).Return(nil).Once()
 
 	eventBusMock := eventmocks.NewMockBus()

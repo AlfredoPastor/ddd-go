@@ -9,6 +9,7 @@ import (
 const TAX_PERCENT float64 = 19.0
 
 type OrderRepository interface {
+	BookProductFromInventory(context.Context, vo.ID, OrderLineQuantity) (vo.ID, error)
 	SearchByClient(context.Context, vo.ID) (Order, error)
 	Search(context.Context, vo.ID) (Order, error)
 	Delete(context.Context, vo.ID) error
@@ -19,6 +20,7 @@ type Order struct {
 	ID              vo.ID
 	ClientID        vo.ID
 	AddressShipping OrderAddressShipping
+	State           OrderState
 	Taxes           OrderTaxes
 	Subtotal        OrderSubtotal
 	Total           OrderTotal
@@ -43,6 +45,7 @@ func NewOrder(id, clientId, address string, orderLines []OrderLine) (Order, erro
 		ClientID:        idClientVo,
 		AddressShipping: addressVo,
 		OderLines:       orderLines,
+		State:           NewOrderState(),
 	}
 	err = order.MakeCalculation()
 	if err != nil {

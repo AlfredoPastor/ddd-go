@@ -1,4 +1,4 @@
-package creator
+package mocks
 
 import (
 	"context"
@@ -14,6 +14,11 @@ type OrderRepositoryMock struct {
 
 func NewOrderRepositoryMock() *OrderRepositoryMock {
 	return &OrderRepositoryMock{}
+}
+
+func (o *OrderRepositoryMock) BookProductFromInventory(ctx context.Context, id vo.ID, quantity domain.OrderLineQuantity) (vo.ID, error) {
+	args := o.Called(ctx, id, quantity)
+	return args.Get(0).(vo.ID), args.Error(1)
 }
 
 func (o *OrderRepositoryMock) SearchByClient(ctx context.Context, id vo.ID) (domain.Order, error) {
