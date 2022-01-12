@@ -23,7 +23,7 @@ func NewOrderRepository(client *mongoatlas.MongoClient) OrderRepository {
 }
 
 func (o OrderRepository) BookProductFromInventory(ctx context.Context, id vo.ID, quantity domain.OrderLineQuantity) (vo.ID, error) {
-	return vo.ID{}, nil
+	return vo.NewID(), nil
 }
 
 func (o OrderRepository) SearchByClient(ctx context.Context, clientID vo.ID) (domain.Order, error) {

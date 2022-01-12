@@ -24,7 +24,7 @@ type Order struct {
 	Taxes           OrderTaxes
 	Subtotal        OrderSubtotal
 	Total           OrderTotal
-	OderLines       []OrderLine
+	OrderLines      []OrderLine
 }
 
 func NewOrder(id, clientId, address string, orderLines []OrderLine) (Order, error) {
@@ -40,12 +40,16 @@ func NewOrder(id, clientId, address string, orderLines []OrderLine) (Order, erro
 	if err != nil {
 		return Order{}, err
 	}
+	stateVo, err := NewOrderState(ORDER_CREATED)
+	if err != nil {
+		return Order{}, err
+	}
 	order := Order{
 		ID:              idVo,
 		ClientID:        idClientVo,
 		AddressShipping: addressVo,
-		OderLines:       orderLines,
-		State:           NewOrderState(),
+		OrderLines:      orderLines,
+		State:           stateVo,
 	}
 	err = order.MakeCalculation()
 	if err != nil {
@@ -58,7 +62,7 @@ func NewOrder(id, clientId, address string, orderLines []OrderLine) (Order, erro
 func (o *Order) MakeCalculation() error {
 	sumTaxes := 0.0
 	sumSubtotal := 0.0
-	for _, ordLine := range o.OderLines {
+	for _, ordLine := range o.OrderLines {
 		subtotal := float64(ordLine.Quantity.Primitive()) * ordLine.Price.Primitive()
 		sumTaxes = sumTaxes + (subtotal / TAX_PERCENT)
 		sumSubtotal = sumSubtotal + subtotal

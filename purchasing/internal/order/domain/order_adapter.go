@@ -31,7 +31,7 @@ func NewOrderAdapter(order Order) OrderAdapter {
 		Subtotal:        order.Subtotal.Primitive(),
 		Total:           order.Total.Primitive(),
 	}
-	orderAdapter.CompleteOrderLines(order.OderLines)
+	orderAdapter.CompleteOrderLines(order.OrderLines)
 	return orderAdapter
 }
 
@@ -56,26 +56,4 @@ func (o *OrderAdapter) CompleteOrderLines(orderLines []OrderLine) {
 		}
 		o.OrderLines = append(o.OrderLines, orderLineAdapter)
 	}
-}
-
-func NewOrderAdapterDeserialize(data []byte) (Order, error) {
-	orderAdapter := OrderAdapter{}
-	err := json.Unmarshal(data, &orderAdapter)
-	if err != nil {
-		return Order{}, err
-	}
-	orderLines := []OrderLine{}
-	for _, orderLineAdapter := range orderAdapter.OrderLines {
-		orderLine, err := NewOrderLine(orderLineAdapter.ID, orderLineAdapter.ProductID, orderLineAdapter.Price, orderLineAdapter.Quantity)
-		if err != nil {
-			return Order{}, err
-		}
-		orderLines = append(orderLines, orderLine)
-	}
-	order, err := NewOrder(orderAdapter.ID, orderAdapter.ClientID, orderAdapter.AddressShipping, orderLines)
-	if err != nil {
-		return Order{}, err
-	}
-
-	return order, nil
 }

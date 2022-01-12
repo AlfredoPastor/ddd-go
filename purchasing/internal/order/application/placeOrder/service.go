@@ -19,7 +19,7 @@ func (p PlaceOrderService) Do(ctx context.Context, id vo.ID) error {
 		return err
 	}
 	order.State.ChangeToPlaced()
-	err = domain.BookProducts(ctx, p.OrderRepository, p.Bus, order.OderLines)
+	err = domain.BookProducts(ctx, p.OrderRepository, p.Bus, order.OrderLines)
 	if err != nil {
 		return err
 	}

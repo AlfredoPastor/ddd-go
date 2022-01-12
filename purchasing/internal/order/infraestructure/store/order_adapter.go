@@ -1,11 +1,10 @@
 package store
 
 import (
-	"encoding/json"
-	"fmt"
 	"log"
 
 	"github.com/AlfredoPastor/ddd-go/purchasing/internal/order/domain"
+	"github.com/AlfredoPastor/ddd-go/shared/vo"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -13,6 +12,7 @@ type OrderAdapter struct {
 	ID              primitive.ObjectID `bson:"_id"`
 	ClientID        primitive.ObjectID `bson:"client_id"`
 	AddressShipping string             `bson:"address_shipping"`
+	State           string             `bson:"state"`
 	Taxes           float64            `bson:"taxes"`
 	Subtotal        float64            `bson:"subtotal"`
 	Total           float64            `bson:"total"`
@@ -43,18 +43,8 @@ func NewOrderAdapter(order domain.Order) OrderAdapter {
 		Subtotal:        order.Subtotal.Primitive(),
 		Total:           order.Total.Primitive(),
 	}
-	orderAdapter.CompleteOrderLines(order.OderLines)
+	orderAdapter.CompleteOrderLines(order.OrderLines)
 	return orderAdapter
-}
-
-func (o *OrderAdapter) Serialize() []byte {
-	entity, err := json.Marshal(o)
-	if err != nil {
-		fmt.Printf("error: %s\n", err.Error())
-		return []byte{}
-	}
-
-	return entity
 }
 
 func (o *OrderAdapter) CompleteOrderLines(orderLines []domain.OrderLine) {
@@ -78,23 +68,69 @@ func (o *OrderAdapter) CompleteOrderLines(orderLines []domain.OrderLine) {
 	}
 }
 
-func NewOrderAdapterDeserialize(data []byte) (domain.Order, error) {
-	orderAdapter := OrderAdapter{}
-	err := json.Unmarshal(data, &orderAdapter)
+func NewOrderFromDatabase(orderAdapter OrderAdapter) (domain.Order, error) {
+	idVo, err := vo.NewIDFromString(orderAdapter.ID.Hex())
 	if err != nil {
 		return domain.Order{}, err
 	}
-	orderLines := []domain.OrderLine{}
+	idClientVo, err := vo.NewIDFromString(orderAdapter.ClientID.Hex())
+	if err != nil {
+		return domain.Order{}, err
+	}
+	addressVo, err := domain.NewOrderAddressShipping(orderAdapter.AddressShipping)
+	if err != nil {
+		return domain.Order{}, err
+	}
+	stateVo, err := domain.NewOrderState(orderAdapter.State)
+	if err != nil {
+		return domain.Order{}, err
+	}
+	taxesVo, err := domain.NewOrderTaxes(orderAdapter.Taxes)
+	if err != nil {
+		return domain.Order{}, err
+	}
+	subtotalVo, err := domain.NewOrderSubtotal(orderAdapter.Subtotal)
+	if err != nil {
+		return domain.Order{}, err
+	}
+	totalVo, err := domain.NewOrderTotal(orderAdapter.Total)
+	if err != nil {
+		return domain.Order{}, err
+	}
+	order := domain.Order{
+		ID:              idVo,
+		ClientID:        idClientVo,
+		AddressShipping: addressVo,
+		State:           stateVo,
+		Taxes:           taxesVo,
+		Subtotal:        subtotalVo,
+		Total:           totalVo,
+		OrderLines:      []domain.OrderLine{},
+	}
 	for _, orderLineAdapter := range orderAdapter.OrderLines {
-		orderLine, err := domain.NewOrderLine(orderLineAdapter.ID.Hex(), orderLineAdapter.ProductID.Hex(), orderLineAdapter.Price, orderLineAdapter.Quantity)
+		idVo, err := vo.NewIDFromString(orderLineAdapter.ID.Hex())
 		if err != nil {
 			return domain.Order{}, err
 		}
-		orderLines = append(orderLines, orderLine)
-	}
-	order, err := domain.NewOrder(orderAdapter.ID.Hex(), orderAdapter.ClientID.Hex(), orderAdapter.AddressShipping, orderLines)
-	if err != nil {
-		return domain.Order{}, err
+		idProductVo, err := vo.NewIDFromString(orderLineAdapter.ProductID.Hex())
+		if err != nil {
+			return domain.Order{}, err
+		}
+		priceVo, err := domain.NewOrderLinePrice(orderLineAdapter.Price)
+		if err != nil {
+			return domain.Order{}, err
+		}
+		quantityVo, err := domain.NewOrderLineQuantity(orderLineAdapter.Quantity)
+		if err != nil {
+			return domain.Order{}, err
+		}
+		orderLine := domain.OrderLine{
+			ID:        idVo,
+			ProductID: idProductVo,
+			Price:     priceVo,
+			Quantity:  quantityVo,
+		}
+		order.OrderLines = append(order.OrderLines, orderLine)
 	}
 
 	return order, nil
