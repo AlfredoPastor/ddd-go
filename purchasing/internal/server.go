@@ -24,8 +24,8 @@ func NewServer(
 	}
 }
 
-func (s *Server) Run() error {
-	ctx := serverContext(context.Background())
+func (s *Server) Run(ctx context.Context) error {
+	ctx = serverContext(ctx)
 	err := s.Bus.Run(ctx)
 	if err != nil {
 		return err

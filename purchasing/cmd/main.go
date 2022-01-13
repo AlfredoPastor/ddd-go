@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"github.com/AlfredoPastor/ddd-go/purchasing/internal"
@@ -11,7 +12,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err, "server building fail")
 	}
-	if err = server.Run(); err != nil {
+	if err = server.Run(context.Background()); err != nil {
 		log.Fatal(err, "server running fail")
 	}
 }
