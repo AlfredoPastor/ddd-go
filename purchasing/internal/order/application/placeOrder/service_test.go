@@ -16,16 +16,16 @@ import (
 func Test_PlaceOrderService(t *testing.T) {
 	ctx := context.Background()
 	id := vo.NewID()
-	addressVo, _ := domain.NewOrderAddressShipping("sdsdsds")
+	addressVo, _ := domain.NewOrderAddressShipping("Indianápolis, Indiana 46218, EE. UU.")
 	priceVo, _ := domain.NewOrderLinePrice(34.0)
 	quantityVo, _ := domain.NewOrderLineQuantity(3)
-
+	stateVo, _ := domain.NewOrderState(domain.ORDER_CREATED)
 	order := domain.Order{
 		ID:              vo.NewID(),
 		ClientID:        vo.NewID(),
 		AddressShipping: addressVo,
-		State:           domain.NewOrderState(),
-		OderLines: []domain.OrderLine{
+		State:           stateVo,
+		OrderLines: []domain.OrderLine{
 			{
 				ID:        vo.NewID(),
 				ProductID: vo.NewID(),
@@ -43,7 +43,7 @@ func Test_PlaceOrderService(t *testing.T) {
 	eventBusMock := eventmocks.NewMockBus()
 	eventBusMock.On("Publish", mock.Anything, mock.AnythingOfType("[]eventbus.Event")).Return(nil).Once().Run(func(args mock.Arguments) {
 		events := args.Get(1).([]eventbus.Event)
-		assert.Equal(t, len(events), 1)
+		assert.Equal(t, 1, len(events))
 	})
 
 	placeOrderService := NewPlaceOrderService(orderRepositoryMock, eventBusMock)

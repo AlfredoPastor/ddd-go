@@ -13,16 +13,19 @@ func BookProducts(ctx context.Context, repo OrderRepository, bus eventbus.Bus, o
 	for _, orderLine := range orderLines {
 		idBooked, err := repo.BookProductFromInventory(ctx, orderLine.ProductID, orderLine.Quantity)
 		if err != nil {
+			events := []eventbus.Event{}
 			for _, idBookedFail := range idsProductsBooked {
-				errP := bus.Publish(ctx, []eventbus.Event{NewProductBookedFailEvent(idBookedFail)})
-				if errP != nil {
-					log.Println(errP.Error())
-				}
+				events = append(events, NewProductBookedFailEvent(idBookedFail))
+			}
+			errP := bus.Publish(ctx, events)
+			if errP != nil {
+				log.Println(errP.Error())
 			}
 			return err
 		}
 		idsProductsBooked = append(idsProductsBooked, idBooked)
 	}
-
+	idsProductsBooked = idsProductsBooked[:0]
+	
 	return nil
 }
