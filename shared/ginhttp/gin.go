@@ -28,11 +28,11 @@ type HttpServer struct {
 	*gin.Engine
 }
 
-func (g HttpServer) Run(ctx context.Context) error {
-	log.Println("Server running on:", g.Server.Addr)
+func (h HttpServer) Run(ctx context.Context) error {
+	log.Println("Server running on:", h.Server.Addr)
 
 	go func() {
-		if err := g.Server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := h.Server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatal("server shut down", err)
 		}
 	}()
@@ -41,7 +41,7 @@ func (g HttpServer) Run(ctx context.Context) error {
 	ctxShutDown, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	return g.Server.Shutdown(ctxShutDown)
+	return h.Server.Shutdown(ctxShutDown)
 }
 
 func NewHttpServer(config Config) HttpServer {
